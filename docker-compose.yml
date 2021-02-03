@@ -1,0 +1,33 @@
+version: '3'
+
+# Define services
+services:
+
+  # App Service
+  source-pricing:
+    # Configuration for building the docker image for the service
+    build:
+      context: ./source-pricing/ # Use an image built from the specified dockerfile in the current directory.
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Forward the exposed port 8000 on the container to port 8000 on the host machine
+    restart: unless-stopped
+    depends_on: 
+      - redis # This service depends on redis. Start that first.
+    links :
+      - redis
+    networks: # Networks to join (Services on the same network can communicate with each other using their name)
+      - backend
+    env_file: ./.env
+
+  # Redis Service   
+  redis:
+    image: "redis:alpine" # Use a public Redis image to build the redis service    
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+networks:
+  backend:    
